@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Entry</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="theme-color" content="#46ACC1" />
+
+</head>
+<body>
+<div class="Navbar">
+  <div class="Navbar__Link Navbar__Link-brand">
+      <a href="index.html">PostManager</a>
+  </div>
+  <div class="Navbar__Link Navbar__Link-toggle">
+    <i class="fa fa-bars"></i>
+  </div>
+  <nav class="Navbar__Items Navbar__Items--right">
+    <div class="Navbar__Link">
+      <a href="login.html">Account</a>
+    </div>
+    <div class="Navbar__Link">
+      <a href="create.html">New Entry</a>
+    </div>
+  </nav>
+</div>
+
+<article>
+            <h1 data-bind="title">Loading...</h1>
+
+            <small>
+                By <span data-bind="author"></span> | 
+                Updated at <span data-bind="updatedAt-formatted"></span> | 
+                <span data-bind="views">0</span> Views
+            </small>
+
+            <hr>
+
+            <div data-bind="content"></div>
+
+            <hr>
+            <div class="text-right">
+                <button id="delete" class="btn btn-lg btn-danger">Delete</button> &nbsp; &nbsp; &nbsp; &nbsp;
+                <a href="" id="update" class="btn btn-lg btn-primary">Update</a>
+            </div>
+
+        </article>
+
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+
+    <script src="//cdn.ckeditor.com/4.5.10/standard/ckeditor.js"></script>
+
+    <script>
+        // firebase config
+        var config = {
+            apiKey: "AIzaSyCkxC-QeVBc_Q2U78Vnj2RJdhmbarW1K_w",
+            authDomain: "easydoc-1b097.firebaseapp.com",
+            databaseURL: "https://easydoc-1b097.firebaseio.com",
+            projectId: "easydoc-1b097",
+            storageBucket: "easydoc-1b097.appspot.com",
+            messagingSenderId: "454937834315"
+        };
+        firebase.initializeApp(config);
+
+        /////////////////////////////////////
+
+        /*********************************\
+         * Fetch and display the entry *
+        \*********************************/
+
+        var entry_id = $_GET('id');
+
+        if (entry_id) {
+            var added_views = false;
+            var Entry = firebase.database().ref('Entry').child(entry_id);
+
+            Entry.on('value', function(r) {
+                var entry = r.val();
+
+                if (entry) {
+
+                    entry['updatedAt-formatted'] = datetimeFormat(entry.updatedAt);
+
+                    $('[data-bind]').each(function() {
+                        $(this).html(entry[$(this).data('bind')]);
+                    });
+
+                    // update title
+                    document.title = 'Firebase - ' + entry.title;
+
+                    // increase views count. once.
+                    if (!added_views) {
+                        added_views = true;
+                        Entry.child('views').transaction(function(views) {
+                            return (views || 0) + 1;
+                        });
+                    }
+
+                } else { // content not found
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // update button
+            $('#update').attr('href', 'update.html?id=' + entry_id);
+
+            // delete button
+            $('#delete').click(function() {
+                if (confirm('This entry will be permanently delete. Are you sure?')) {
+                    Entry.remove(); // this will trigger Entry.on('value') immediatly
+                }
+            });
+        } else {
+            alert('This entry id does not exist');
+            window.location.href = 'index.html';
+        }
+
+        /*************\
+         * Utilities *
+        \*************/
+
+        function $_GET(key) {
+            var queries = window.location.href.split('?').pop().split('&');
+            var params = {};
+            queries.map(function(query) {
+                var set = query.split('=');
+                params[set[0]] = set[1];
+            });
+
+            if (key) {
+                return params[key] || null;
+            } else {
+                return params;
+            }
+
+        }
+
+        function pad2Digit(num) {
+            return ('0' + num.toString()).slice(-2);
+        }
+
+        function datetimeFormat(timestamp) {
+            var dateObj = new Date(timestamp);
+            var en_month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return dateObj.getDate() + ' ' + en_month[dateObj.getMonth()] + ' ' + pad2Digit(dateObj.getFullYear()) + ' ' + pad2Digit(dateObj.getHours()) + ':' + pad2Digit(dateObj.getMinutes());
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Posts</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="theme-color" content="#46ACC1" />
+  <link rel="manifest" href="/manifest.json">
+
+</head>
+<body>
+<div class="Navbar">
+  <div class="Navbar__Link Navbar__Link-brand">
+      <a href="index.html">PostManager</a>
+  </div>
+  <div class="Navbar__Link Navbar__Link-toggle">
+    <i class="fa fa-bars"></i>
+  </div>
+  <nav class="Navbar__Items Navbar__Items--right">
+    <div class="Navbar__Link">
+      <a href="login.html">Account</a>
+    </div>
+    <div class="Navbar__Link">
+      <a href="create.html">New Entry</a>
+    </div>
+  </nav>
+</div>
+
+
+<div class="flex-container" id="entries">
+    <h4 data-bind="title">Loading...</h4>
+</div>
+
+<a href="create.html" class="float">
+<i class="fa fa-plus my-float"></i>
+</a>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+    <script>
+        // firebase config
+        var config = {
+            apiKey: "AIzaSyCkxC-QeVBc_Q2U78Vnj2RJdhmbarW1K_w",
+            authDomain: "easydoc-1b097.firebaseapp.com",
+            databaseURL: "https://easydoc-1b097.firebaseio.com",
+            projectId: "easydoc-1b097",
+            storageBucket: "easydoc-1b097.appspot.com",
+            messagingSenderId: "454937834315"
+        };
+        firebase.initializeApp(config);
+
+        /////////////////////////////////////
+
+        var Blog = firebase.database().ref('Entry').orderByChild('updatedAt');
+
+        Blog.on('value', function(r) {
+
+            $('#entries').html('Loading...');
+            var html = '';
+            r.forEach(function(item) {
+                entry = item.val()
+                html = '<div class="content">' +
+                    '<a href="entry.html?id=' + item.getKey() + '" style="text-decoration:none!important;">' +
+                    // '<div class="header">' + excerpt(entry.title, 140) + '</div>' +
+                    '<div class="content-body">' +
+                    '<p>' + excerpt(entry.content, 250) + '</p>' +
+                    '</div>' +
+                    '<small class"content-footer">By ' + entry.author + ' | ' + datetimeFormat(entry.updatedAt) + ' | ' + entry.views + ' views</small>' +
+                    '</a>' +
+                    '</div>' + html; // prepend the entry because we need to display it in reverse order
+            });
+
+            $('#entries').html(html);
+        });
+
+        /*************\
+         * Utilities *
+        \*************/
+
+        function strip(html) {
+            var tmp = document.createElement("DIV");
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || "";
+        }
+
+        function excerpt(text, length) {
+            text = strip(text);
+            text = $.trim(text); //trim whitespace
+            if (text.length > length) {
+                text = text.substring(0, length - 3) + '...';
+            }
+            return text;
+        }
+
+        function pad2Digit(num) {
+            return ('0' + num.toString()).slice(-2);
+        }
+
+        function datetimeFormat(timestamp) {
+            var dateObj = new Date(timestamp);
+            var en_month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return dateObj.getDate() + ' ' + en_month[dateObj.getMonth()] + ' ' + pad2Digit(dateObj.getFullYear()) + ' ' + pad2Digit(dateObj.getHours()) + ':' + pad2Digit(dateObj.getMinutes());
+        }
+    </script>
+
+        <script>
+
+
+          if ("serviceWorker" in navigator) {
+
+              navigator.serviceWorker.register("service-worker.js")
+
+                  .then(function(registration) {
+
+                      console.log("Service Worker registered with scope:", registration.scope);
+
+                  }).catch(function(err) {
+
+                      console.log("Service worker registration failed:", err);
+
+                  });
+
+          }
+
+        </script>
+
+  </body>
+</html>

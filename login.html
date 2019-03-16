@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login </title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="theme-color" content="#46ACC1" />
+</head>
+<body>
+<div class="Navbar">
+  <div class="Navbar__Link Navbar__Link-brand">
+      <a href="index.html">PostManager</a>
+  </div>
+  <div class="Navbar__Link Navbar__Link-toggle">
+    <i class="fa fa-bars"></i>
+  </div>
+  <nav class="Navbar__Items Navbar__Items--right">
+    <div class="Navbar__Link">
+      <a href="profile">Account</a>
+    </div>
+    <div class="Navbar__Link">
+      <a href="create.html">New Entry</a>
+    </div>
+  </nav>
+</div>
+
+
+          <div id="firebaseui-auth-container"></div>
+
+
+
+    <script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+
+    <!-- member plugins -->
+    <script src="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.css" />
+    <!-- End - member plugins -->
+
+    <script>
+        // firebase config
+        var config = {
+            apiKey: "AIzaSyCkxC-QeVBc_Q2U78Vnj2RJdhmbarW1K_w",
+            authDomain: "easydoc-1b097.firebaseapp.com",
+            databaseURL: "https://easydoc-1b097.firebaseio.com",
+            projectId: "easydoc-1b097",
+            storageBucket: "easydoc-1b097.appspot.com",
+            messagingSenderId: "454937834315"
+        };
+        firebase.initializeApp(config);
+
+        /////////////////////////////////////
+
+
+        /**********************\
+         * Check login status *
+        \**********************/
+
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) { // if already logged in
+                window.location.href = 'profile.html';
+            }
+        });
+
+        /*******************\
+         * init Login UI *
+        \*******************/
+
+        // FirebaseUI config.
+        var uiConfig = {
+            'signInSuccessUrl': false,
+            'signInOptions': [
+                // comment unused sign-in method
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+                //firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+                //firebase.auth.GithubAuthProvider.PROVIDER_ID,
+                firebase.auth.EmailAuthProvider.PROVIDER_ID
+            ],
+            // Terms of service url.
+            'tosUrl': false,
+        };
+
+        // Initialize the FirebaseUI Widget using Firebase.
+        var ui = new firebaseui.auth.AuthUI(firebase.auth());
+        // The start method will wait until the DOM is loaded.
+        ui.start('#firebaseui-auth-container', uiConfig);
+
+        ////////////////////////////////////////
+    </script>
+
+  </body>
+</html>
